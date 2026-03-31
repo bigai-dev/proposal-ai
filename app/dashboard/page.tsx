@@ -43,6 +43,14 @@ export default function DashboardPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  async function handleDelete(id: string) {
+    if (!confirm("Are you sure you want to delete this proposal?")) return;
+    const res = await fetch(`/api/proposals/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setProposals((prev) => prev.filter((p) => p.id !== id));
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       <Header />
@@ -91,7 +99,7 @@ export default function DashboardPage() {
                       <th className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Budget</th>
                       <th className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
                       <th className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Date</th>
-                      <th className="px-6 py-3"></th>
+                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -105,13 +113,27 @@ export default function DashboardPage() {
                         <td className="px-6 py-4 text-sm">{p.budget}</td>
                         <td className="px-6 py-4"><StatusBadge status={p.status} /></td>
                         <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{formatDate(p.created_at)}</td>
-                        <td className="px-6 py-4 text-right">
-                          <Link
-                            href={`/dashboard/${p.id}`}
-                            className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline"
-                          >
-                            View
-                          </Link>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-3">
+                            <Link
+                              href={`/dashboard/${p.id}`}
+                              className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline"
+                            >
+                              View
+                            </Link>
+                            <a
+                              href={`mailto:${p.email}?subject=Proposal from CodeForge Solutions - ${p.company_name}&body=Dear ${p.full_name},%0D%0A%0D%0APlease find attached our proposal for your ${p.service} project.%0D%0A%0D%0ABest regards,%0D%0ACodeForge Solutions Sdn Bhd`}
+                              className="text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
+                            >
+                              Email
+                            </a>
+                            <button
+                              onClick={() => handleDelete(p.id)}
+                              className="text-slate-400 dark:text-slate-500 text-sm font-medium hover:text-red-600 dark:hover:text-red-400 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -122,10 +144,9 @@ export default function DashboardPage() {
               {/* Mobile Cards */}
               <div className="md:hidden space-y-3">
                 {proposals.map((p) => (
-                  <Link
+                  <div
                     key={p.id}
-                    href={`/dashboard/${p.id}`}
-                    className="block p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                    className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -141,7 +162,12 @@ export default function DashboardPage() {
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
                       {formatDate(p.created_at)}
                     </p>
-                  </Link>
+                    <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                      <Link href={`/dashboard/${p.id}`} className="text-blue-600 dark:text-blue-400 text-sm font-medium">View</Link>
+                      <a href={`mailto:${p.email}`} className="text-slate-500 dark:text-slate-400 text-sm font-medium">Email</a>
+                      <button onClick={() => handleDelete(p.id)} className="text-slate-400 dark:text-slate-500 text-sm font-medium hover:text-red-600">Delete</button>
+                    </div>
+                  </div>
                 ))}
               </div>
             </>

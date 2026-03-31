@@ -118,12 +118,21 @@ export default function ProposalOutput({ formData, onReset }: ProposalOutputProp
       >
         {/* Proposal Header */}
         <div className="mb-8 pb-6 border-b border-slate-200 dark:border-slate-700">
-          <p className="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">
-            Proposal
-          </p>
-          <p className="text-lg text-slate-700 dark:text-slate-300">
-            Prepared for <span className="font-semibold">{formData.companyName}</span>
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">
+                Proposal
+              </p>
+              <p className="text-lg text-slate-700 dark:text-slate-300">
+                Prepared for <span className="font-semibold">{formData.companyName}</span>
+              </p>
+            </div>
+            <div className="text-right shrink-0 ml-4">
+              <span className="text-xl font-bold text-blue-600 dark:text-blue-500">CodeForge</span>
+              <span className="text-xl text-slate-600 dark:text-slate-400 ml-1">Solutions</span>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">From Concept to Code — Shipped.</p>
+            </div>
+          </div>
         </div>
 
         {/* Loading state */}
@@ -162,12 +171,20 @@ export default function ProposalOutput({ formData, onReset }: ProposalOutputProp
           &larr; Back to Form
         </button>
         {!isStreaming && content.length > 0 && (
-          <button
-            onClick={() => window.print()}
-            className="px-6 py-2.5 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
-          >
-            Download as PDF
-          </button>
+          <div className="flex items-center gap-3">
+            <a
+              href={`mailto:${formData.email}?subject=Proposal from CodeForge Solutions - ${formData.companyName}&body=Dear ${formData.fullName},%0D%0A%0D%0APlease find attached our proposal for your ${formData.service} project.%0D%0A%0D%0ABest regards,%0D%0ACodeForge Solutions Sdn Bhd`}
+              className="px-6 py-2.5 rounded-lg font-semibold text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            >
+              Email Client
+            </a>
+            <button
+              onClick={() => window.print()}
+              className="px-6 py-2.5 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
+            >
+              Download as PDF
+            </button>
+          </div>
         )}
       </div>
     </div>

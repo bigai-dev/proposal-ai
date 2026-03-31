@@ -161,12 +161,27 @@ ADDITIONAL RULES:
 - Keep the total proposal between 800-1200 words
 - Do not fabricate specific case studies or client names
 - Include today's date and a reference number in format: CF-2026-XXXX (generate random 4 digits)
-- Start with a metadata block before the first section:
+- Start with a metadata block before the first section. EACH field MUST be on its own separate line (use a blank line between each):
 
 **Date:** [Today's date]
+
 **Reference:** CF-2026-XXXX
+
 **Prepared for:** [Client Name], [Company Name]
-**Prepared by:** CodeForge Solutions Sdn Bhd`;
+
+**Prepared by:** CodeForge Solutions Sdn Bhd
+
+- End the proposal with a properly formatted contact block. EACH detail MUST be on its own separate line:
+
+**Contact Information:**
+
+**CodeForge Solutions Sdn Bhd**
+
+Email: proposals@codeforge.com.my
+
+Phone: +60 3-2148 9500
+
+Address: Level 15, Menara UOA Bangsar, Kuala Lumpur`;
 
 export function buildUserPrompt(data: InquiryFormData): string {
   return `New client inquiry received:

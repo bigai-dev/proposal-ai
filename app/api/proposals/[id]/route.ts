@@ -41,3 +41,23 @@ export async function PATCH(
     return Response.json({ error: "Failed to update proposal" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const { error } = await supabase
+      .from("proposals")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    return Response.json({ success: true });
+  } catch {
+    return Response.json({ error: "Failed to delete proposal" }, { status: 500 });
+  }
+}

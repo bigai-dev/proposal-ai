@@ -88,18 +88,27 @@ export default function ProposalViewPage() {
           <div className="proposal-card bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 md:p-12">
             {/* Proposal Header */}
             <div className="mb-8 pb-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center gap-3 mb-2">
-                <p className="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                  Proposal
-                </p>
-                <StatusBadge status={proposal.status} />
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                      Proposal
+                    </p>
+                    <StatusBadge status={proposal.status} />
+                  </div>
+                  <p className="text-lg text-slate-700 dark:text-slate-300">
+                    Prepared for <span className="font-semibold">{proposal.company_name}</span>
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    {proposal.full_name} &middot; {date}
+                  </p>
+                </div>
+                <div className="text-right shrink-0 ml-4">
+                  <span className="text-xl font-bold text-blue-600 dark:text-blue-500">CodeForge</span>
+                  <span className="text-xl text-slate-600 dark:text-slate-400 ml-1">Solutions</span>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">From Concept to Code — Shipped.</p>
+                </div>
               </div>
-              <p className="text-lg text-slate-700 dark:text-slate-300">
-                Prepared for <span className="font-semibold">{proposal.company_name}</span>
-              </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                {proposal.full_name} &middot; {date}
-              </p>
             </div>
 
             {/* Proposal Content */}
@@ -137,12 +146,20 @@ export default function ProposalViewPage() {
               &larr; Back to Dashboard
             </Link>
             {proposal.proposal_content && (
-              <button
-                onClick={() => window.print()}
-                className="px-6 py-2.5 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
-              >
-                Download as PDF
-              </button>
+              <div className="flex items-center gap-3">
+                <a
+                  href={`mailto:${proposal.email}?subject=Proposal from CodeForge Solutions - ${proposal.company_name}&body=Dear ${proposal.full_name},%0D%0A%0D%0APlease find attached our proposal for your ${proposal.service} project.%0D%0A%0D%0ABest regards,%0D%0ACodeForge Solutions Sdn Bhd`}
+                  className="px-6 py-2.5 rounded-lg font-semibold text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                >
+                  Email Client
+                </a>
+                <button
+                  onClick={() => window.print()}
+                  className="px-6 py-2.5 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
+                >
+                  Download as PDF
+                </button>
+              </div>
             )}
           </div>
         </div>
