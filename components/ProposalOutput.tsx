@@ -15,12 +15,27 @@ export default function ProposalOutput({ formData, onReset }: ProposalOutputProp
   const [isStreaming, setIsStreaming] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const proposalIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
+    let fullContent = "";
 
     async function generate() {
       try {
+        // Step 1: Save inquiry to Supabase, get proposal ID
+        const saveRes = await fetch("/api/proposals", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+          signal: controller.signal,
+        });
+
+        if (!saveRes.ok) throw new Error("Failed to save proposal");
+        const { id } = await saveRes.json();
+        proposalIdRef.current = id;
+
+        // Step 2: Stream the proposal from Claude
         const response = await fetch("/api/generate-proposal", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -28,9 +43,7 @@ export default function ProposalOutput({ formData, onReset }: ProposalOutputProp
           signal: controller.signal,
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to generate proposal");
-        }
+        if (!response.ok) throw new Error("Failed to generate proposal");
 
         const reader = response.body!.getReader();
         const decoder = new TextDecoder();
@@ -39,14 +52,34 @@ export default function ProposalOutput({ formData, onReset }: ProposalOutputProp
           const { done, value } = await reader.read();
           if (done) break;
           const chunk = decoder.decode(value, { stream: true });
+          fullContent += chunk;
           setContent((prev) => prev + chunk);
         }
 
         setIsStreaming(false);
+
+        // Step 3: Save the completed proposal content
+        await fetch(`/api/proposals/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            proposal_content: fullContent,
+            status: "completed",
+          }),
+        });
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
           setError("Something went wrong. Please try again.");
           setIsStreaming(false);
+
+          // Mark as failed if we have an ID
+          if (proposalIdRef.current) {
+            fetch(`/api/proposals/${proposalIdRef.current}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "failed" }),
+            });
+          }
         }
       }
     }

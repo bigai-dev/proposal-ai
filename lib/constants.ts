@@ -34,3 +34,18 @@ export interface InquiryFormData {
   budget: string;
   timeline: string;
 }
+
+export interface Proposal {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  company_name: string;
+  service: string;
+  project_description: string;
+  budget: string;
+  timeline: string;
+  proposal_content: string;
+  status: "generating" | "completed" | "failed";
+  created_at: string;
+}
