@@ -104,7 +104,7 @@ export default function ProposalViewPage() {
 
             {/* Proposal Content */}
             {proposal.proposal_content ? (
-              <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-slate-900 dark:prose-headings:text-slate-100 prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-li:text-slate-700 dark:prose-li:text-slate-300 prose-strong:text-slate-900 dark:prose-strong:text-slate-100 prose-table:text-sm">
+              <div className="proposal-prose max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {proposal.proposal_content}
                 </ReactMarkdown>
