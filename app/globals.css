@@ -1,3 +1,77 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Blinking cursor animation for streaming */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Print styles for PDF output */
+@media print {
+  header,
+  footer,
+  .print-hidden {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .proposal-card {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .proposal-card::before {
+    content: "CodeForge Solutions Sdn Bhd";
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2563eb;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+  }
+
+  .proposal-card::after {
+    content: "CodeForge Solutions Sdn Bhd | www.codeforgesolutions.com | hello@codeforgesolutions.com";
+    display: block;
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid #ccc;
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+  }
+
+  @page {
+    margin: 2cm;
+  }
+
+  h1, h2, h3, h4 {
+    break-after: avoid;
+  }
+
+  /* Force all text colors for print */
+  .proposal-card * {
+    color: black !important;
+    background: transparent !important;
+  }
+
+  .proposal-card h1,
+  .proposal-card h2 {
+    color: #1e293b !important;
+  }
+}
