@@ -1,29 +1,29 @@
-import { supabase } from "@/lib/supabase";
+import { turso } from "@/lib/turso";
 import { InquiryFormData } from "@/lib/constants";
 
 export async function POST(request: Request) {
   try {
     const formData: InquiryFormData = await request.json();
+    const id = crypto.randomUUID();
 
-    const { data, error } = await supabase
-      .from("proposals")
-      .insert({
-        full_name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        company_name: formData.companyName,
-        service: formData.service,
-        project_description: formData.projectDescription,
-        budget: formData.budget,
-        timeline: formData.timeline,
-        status: "generating",
-      })
-      .select("id")
-      .single();
+    await turso.execute({
+      sql: `INSERT INTO proposals (id, full_name, email, phone, company_name, service, project_description, budget, timeline, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        id,
+        formData.fullName,
+        formData.email,
+        formData.phone,
+        formData.companyName,
+        formData.service,
+        formData.projectDescription,
+        formData.budget,
+        formData.timeline,
+        "generating",
+      ],
+    });
 
-    if (error) throw error;
-
-    return Response.json({ id: data.id });
+    return Response.json({ id });
   } catch {
     return Response.json({ error: "Failed to save proposal" }, { status: 500 });
   }
@@ -31,14 +31,11 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const { data, error } = await supabase
-      .from("proposals")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const result = await turso.execute(
+      "SELECT * FROM proposals ORDER BY created_at DESC"
+    );
 
-    if (error) throw error;
-
-    return Response.json(data);
+    return Response.json(result.rows);
   } catch {
     return Response.json({ error: "Failed to fetch proposals" }, { status: 500 });
   }

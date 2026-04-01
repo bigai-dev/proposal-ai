@@ -1,4 +1,5 @@
-import { supabase } from "@/lib/supabase";
+import { turso } from "@/lib/turso";
+import { type InValue } from "@libsql/client";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -7,15 +8,16 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const { data, error } = await supabase
-      .from("proposals")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const result = await turso.execute({
+      sql: "SELECT * FROM proposals WHERE id = ?",
+      args: [id],
+    });
 
-    if (error) throw error;
+    if (result.rows.length === 0) {
+      return Response.json({ error: "Proposal not found" }, { status: 404 });
+    }
 
-    return Response.json(data);
+    return Response.json(result.rows[0]);
   } catch {
     return Response.json({ error: "Proposal not found" }, { status: 404 });
   }
@@ -29,12 +31,15 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    const { error } = await supabase
-      .from("proposals")
-      .update(body)
-      .eq("id", id);
+    const setClauses = Object.keys(body)
+      .map((key) => `${key} = ?`)
+      .join(", ");
+    const values = [...Object.values(body), id] as InValue[];
 
-    if (error) throw error;
+    await turso.execute({
+      sql: `UPDATE proposals SET ${setClauses} WHERE id = ?`,
+      args: values,
+    });
 
     return Response.json({ success: true });
   } catch {
@@ -49,12 +54,10 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const { error } = await supabase
-      .from("proposals")
-      .delete()
-      .eq("id", id);
-
-    if (error) throw error;
+    await turso.execute({
+      sql: "DELETE FROM proposals WHERE id = ?",
+      args: [id],
+    });
 
     return Response.json({ success: true });
   } catch {
