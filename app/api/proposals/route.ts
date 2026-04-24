@@ -1,5 +1,44 @@
+import { after } from "next/server";
+import OpenAI from "openai";
 import { turso } from "@/lib/turso";
+import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompts";
 import { InquiryFormData } from "@/lib/constants";
+
+async function generateAndSave(id: string, formData: InquiryFormData) {
+  try {
+    await turso.execute({
+      sql: "UPDATE proposals SET status = ? WHERE id = ?",
+      args: ["generating", id],
+    });
+
+    const client = new OpenAI({
+      apiKey: process.env.ARK_API_KEY,
+      baseURL: "https://ark.ap-southeast.bytepluses.com/api/v3",
+    });
+
+    const completion = await client.chat.completions.create({
+      model: "ep-20260103034841-vrwmk",
+      max_tokens: 4096,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: buildUserPrompt(formData) },
+      ],
+    });
+
+    const content = completion.choices[0]?.message?.content ?? "";
+
+    await turso.execute({
+      sql: "UPDATE proposals SET proposal_content = ?, status = ? WHERE id = ?",
+      args: [content, "completed", id],
+    });
+  } catch (err) {
+    console.error("Proposal generation failed", err);
+    await turso.execute({
+      sql: "UPDATE proposals SET status = ? WHERE id = ?",
+      args: ["failed", id],
+    });
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -19,9 +58,11 @@ export async function POST(request: Request) {
         formData.projectDescription,
         formData.budget,
         formData.timeline,
-        "generating",
+        "pending",
       ],
     });
+
+    after(() => generateAndSave(id, formData));
 
     return Response.json({ id });
   } catch {

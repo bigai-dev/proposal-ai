@@ -5,9 +5,10 @@ import { SERVICES, BUDGETS, TIMELINES, InquiryFormData } from "@/lib/constants";
 
 interface InquiryFormProps {
   onSubmit: (data: InquiryFormData) => void;
+  submitting?: boolean;
 }
 
-export default function InquiryForm({ onSubmit }: InquiryFormProps) {
+export default function InquiryForm({ onSubmit, submitting }: InquiryFormProps) {
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -50,7 +51,7 @@ export default function InquiryForm({ onSubmit }: InquiryFormProps) {
           Project Inquiry
         </h1>
         <p className="text-slate-500 dark:text-slate-400">
-          Tell us about your project and we&apos;ll generate a proposal instantly.
+          Tell us about your project and we&apos;ll get back to you with a proposal.
         </p>
       </div>
 
@@ -187,10 +188,10 @@ export default function InquiryForm({ onSubmit }: InquiryFormProps) {
 
       <button
         type="submit"
-        disabled={!isValid}
+        disabled={!isValid || submitting}
         className="w-full py-3 px-6 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        Generate Proposal
+        {submitting ? "Submitting..." : "Submit Enquiry"}
       </button>
     </form>
   );

@@ -46,6 +46,6 @@ export interface Proposal {
   budget: string;
   timeline: string;
   proposal_content: string;
-  status: "generating" | "completed" | "failed";
+  status: "pending" | "generating" | "completed" | "failed";
   created_at: string;
 }
