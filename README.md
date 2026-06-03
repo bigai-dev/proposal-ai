@@ -1,56 +1,46 @@
 # CodeForge Proposal AI
 
-An AI-powered proposal generator built for the **Vibe Coding workshop**. A fictional
-software agency ("CodeForge Solutions Sdn Bhd") collects project enquiries, and the
-AI writes a full, formatted proposal in the background.
+An AI-powered proposal generator that turns a simple client enquiry form into a complete, professionally formatted project proposal.
 
-Built with **Next.js 16**, **Tailwind v4**, **Turso (libSQL)**, and a
-BytePlus Ark LLM (OpenAI-compatible).
+Built for a fictional software agency ("CodeForge Solutions Sdn Bhd"), this app collects project enquiries through a public form and uses an LLM to write a full, structured proposal in the background. It's a sales-automation demo aimed at agencies and developers who want to see how AI can draft client-ready documents end to end.
 
----
+## Features
 
-## What you get
+- **Public enquiry form** (`/apply`) capturing name, email, phone, company, service, project description, budget, and timeline.
+- **AI proposal writing** — each submission triggers an LLM that produces a multi-section Markdown proposal (executive summary, scope, timeline, pricing tables, payment schedule, and next steps).
+- **Background generation** using Next.js `after()` — the form responds instantly while the proposal is written after the response is sent, with status flowing from `pending` → `generating` → `completed` (or `failed` on error).
+- **Proposals dashboard** (`/dashboard`) listing every submission, with view and delete actions.
+- **Full proposal view** (`/dashboard/[id]`) rendering the Markdown proposal (with GitHub-flavored Markdown tables), a status badge, a **Download as PDF** button (browser print), and an **Email Client** button (pre-filled `mailto:` link).
+- **Dark / light mode toggle** for the interface.
+- **REST API** under `/api/proposals` for creating, listing, fetching, updating, and deleting proposals.
 
-- `/apply` — a public enquiry form (name, company, service, budget, timeline, project description)
-- `/dashboard` — a list of every submitted proposal, with status, email, view, and delete actions
-- `/dashboard/[id]` — the full, rendered Markdown proposal with a **Download as PDF** button (browser print) and an **Email Client** button (pre-filled `mailto:`)
-- Dark / light mode toggle with `localStorage` persistence
-- Background proposal generation using `next/server`'s `after()` hook — the form returns instantly, the AI writes the proposal after the response is sent
+## Tech Stack
 
----
+- **Framework:** Next.js 16 (App Router, Turbopack)
+- **Language:** TypeScript
+- **UI:** React 19
+- **Styling:** Tailwind CSS v4 (PostCSS)
+- **Database:** Turso / libSQL (`@libsql/client`)
+- **AI provider:** BytePlus Ark, called through the OpenAI-compatible `openai` SDK
+- **Markdown rendering:** react-markdown + remark-gfm
 
-## Setup (5 minutes)
+## Getting Started
 
-### 1. Prerequisites
+### Prerequisites
 
-- **Node.js 20+** and **npm**
-- A **Turso** account — free tier is fine (https://turso.tech)
-- A **BytePlus Ark** API key (https://console.byteplus.com) — or swap to any OpenAI-compatible provider (see "Swapping the LLM" below)
+- Node.js 20+ and npm
+- A Turso (libSQL) database — free tier is fine
+- A BytePlus Ark API key (or any OpenAI-compatible provider)
 
-### 2. Clone and install
+### Installation
 
 ```bash
-git clone <this-repo-url>
-cd proposal-ai
 npm install
 ```
 
-### 3. Create your Turso database
+### Database Setup
 
-Install the Turso CLI (https://docs.turso.tech/cli/installation), then:
-
-```bash
-turso auth login
-turso db create proposal-generator
-turso db show proposal-generator --url        # copy the libsql:// URL
-turso db tokens create proposal-generator     # copy the auth token
-```
-
-Create the `proposals` table:
-
-```bash
-turso db shell proposal-generator
-```
+Create a `proposals` table in your Turso database:
 
 ```sql
 CREATE TABLE proposals (
@@ -67,149 +57,41 @@ CREATE TABLE proposals (
   status TEXT NOT NULL DEFAULT 'pending',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
-.quit
 ```
 
-### 4. Add your environment variables
+### Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in the three values:
+Copy `.env.example` to `.env.local` and fill in:
 
-```bash
-cp .env.example .env.local
-```
+| Variable | Description |
+|----------|-------------|
+| `TURSO_DATABASE_URL` | Connection URL for your Turso / libSQL database |
+| `TURSO_AUTH_TOKEN` | Auth token for the Turso database |
+| `ARK_API_KEY` | API key for the BytePlus Ark LLM (OpenAI-compatible) |
 
-```
-TURSO_DATABASE_URL=libsql://your-database.turso.io
-TURSO_AUTH_TOKEN=your-turso-auth-token
-ARK_API_KEY=your-byteplus-ark-api-key
-```
+`.env.local` is gitignored, so your keys stay on your machine.
 
-> `.env.local` is gitignored — your keys stay on your machine.
-
-### 5. Run it
+### Running Locally
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000. You'll be redirected to `/apply`. Submit the form,
-then visit `/dashboard` to watch the proposal status flip from **pending** →
-**generating** → **completed**.
+Then open http://localhost:3000 in your browser. You'll be redirected to `/apply`. Submit the form, then visit `/dashboard` to watch the proposal status update as the AI writes it.
 
----
+## Project Structure
 
-## How it works
+- `app/` — Next.js App Router pages and API routes
+  - `app/apply/` — the public enquiry form page
+  - `app/dashboard/` — the proposals list and the full proposal view (`[id]`)
+  - `app/api/proposals/` — REST endpoints (create/list, and get/update/delete by id)
+  - `app/page.tsx` — redirects the root to `/apply`
+- `components/` — shared UI: Header, Footer, InquiryForm, ThemeToggle
+- `lib/` — application logic
+  - `lib/prompts.ts` — the system and user prompts sent to the LLM
+  - `lib/constants.ts` — service/budget/timeline options and TypeScript types
+  - `lib/turso.ts` — the libSQL client
 
-```
-┌────────────┐   POST /api/proposals   ┌───────────────┐
-│ /apply     │ ─────────────────────▶  │ insert row    │
-│ (form)     │                         │ status=pending│
-└────────────┘                         └───────┬───────┘
-                                               │ after() responds to client
-                                               ▼
-                                  ┌────────────────────────┐
-                                  │ call BytePlus Ark LLM  │
-                                  │ stream → full text     │
-                                  └───────┬────────────────┘
-                                          ▼
-                                  ┌────────────────────────┐
-                                  │ update row              │
-                                  │ status=completed       │
-                                  └────────────────────────┘
-```
+## Notes
 
-Key files:
-
-- [app/apply/page.tsx](app/apply/page.tsx) — the enquiry form page
-- [app/dashboard/page.tsx](app/dashboard/page.tsx) — the list view
-- [app/dashboard/[id]/page.tsx](app/dashboard/[id]/page.tsx) — the proposal view
-- [app/api/proposals/route.ts](app/api/proposals/route.ts) — POST (create + trigger generation) and GET (list)
-- [app/api/proposals/[id]/route.ts](app/api/proposals/[id]/route.ts) — GET, PATCH, DELETE by id
-- [lib/prompts.ts](lib/prompts.ts) — the system + user prompt sent to the LLM
-- [lib/constants.ts](lib/constants.ts) — dropdown options and TypeScript types
-- [lib/turso.ts](lib/turso.ts) — the libSQL client
-
----
-
-## What to modify next (prompts to try in Claude Code)
-
-This is a workshop project — the whole point is to make it your own. Open this
-folder in Claude Code and try these prompts:
-
-**Rebrand it as your own agency:**
-```
-Rebrand this app as "Acme Digital" — a marketing agency in Singapore.
-Update the logo text, footer, prompt (lib/prompts.ts), services, and pricing
-to match a typical digital marketing firm (SEO, paid ads, content, social).
-Prices in SGD.
-```
-
-**Change the services & pricing:**
-```
-Update lib/constants.ts and lib/prompts.ts to offer these services instead:
-- Interior Design Consultation (RM 5,000)
-- Full Home Renovation (RM 80,000+)
-- Commercial Fit-out (RM 150,000+)
-Also update the budget ranges to match.
-```
-
-**Swap the LLM:**
-```
-Switch from BytePlus Ark to OpenAI GPT-4o. Use the existing `openai` package —
-just remove the baseURL and change the model name. Put OPENAI_API_KEY in
-.env.example.
-```
-(or Anthropic Claude, Google Gemini, a local Ollama server, etc.)
-
-**Add email notifications:**
-```
-When a proposal finishes generating, send an email to the client using Resend
-(https://resend.com). Add RESEND_API_KEY to env. Attach the rendered proposal
-as a PDF or include it inline.
-```
-
-**Add authentication:**
-```
-Put the /dashboard routes behind auth using Clerk (https://clerk.com).
-Only logged-in users should be able to view or delete proposals. /apply
-stays public.
-```
-
-**Polish the proposal:**
-```
-In lib/prompts.ts, tell the LLM to include a risks section, a team-bio section,
-and 3 recent (fake but plausible) case studies relevant to the client's industry.
-```
-
-**Add analytics:**
-```
-On the dashboard, show: total proposals, conversion rate (completed / total),
-average budget, and a chart of proposals per week. Use Recharts.
-```
-
----
-
-## Tech stack
-
-| Layer      | Choice                                       |
-|------------|----------------------------------------------|
-| Framework  | Next.js 16 (App Router, Turbopack)           |
-| Language   | TypeScript                                   |
-| Styling    | Tailwind CSS v4                              |
-| Database   | Turso (libSQL / SQLite at the edge)          |
-| LLM        | BytePlus Ark (OpenAI-compatible API)         |
-| Markdown   | react-markdown + remark-gfm                  |
-| PDF export | Browser print-to-PDF (CSS `@media print`)    |
-
----
-
-## Deploying
-
-The easiest path is **Vercel** — push to GitHub, import the repo, and set the
-same three env vars in the Vercel dashboard. It just works.
-
----
-
-## License
-
-MIT — do whatever you want with it.
+This project was built as a demo for the Vibe Coding workshop. The agency, pricing, and contact details are fictional and meant to be customized — open the folder in Claude Code and adapt the branding, services, prompts, or AI provider to make it your own.
