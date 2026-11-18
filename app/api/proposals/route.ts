@@ -12,12 +12,12 @@ async function generateAndSave(id: string, formData: InquiryFormData) {
     });
 
     const client = new OpenAI({
-      apiKey: process.env.ARK_API_KEY,
-      baseURL: "https://ark.ap-southeast.bytepluses.com/api/v3",
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      baseURL: "https://api.deepseek.com",
     });
 
     const completion = await client.chat.completions.create({
-      model: "ep-20260103034841-vrwmk",
+      model: "deepseek-chat",
       max_tokens: 4096,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },

@@ -31,10 +31,15 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    const setClauses = Object.keys(body)
-      .map((key) => `${key} = ?`)
-      .join(", ");
-    const values = [...Object.values(body), id] as InValue[];
+    const ALLOWED_FIELDS = ["proposal_content", "status", "sent_at"];
+    const keys = Object.keys(body).filter((key) => ALLOWED_FIELDS.includes(key));
+
+    if (keys.length === 0) {
+      return Response.json({ error: "No valid fields to update" }, { status: 400 });
+    }
+
+    const setClauses = keys.map((key) => `${key} = ?`).join(", ");
+    const values = [...keys.map((key) => body[key]), id] as InValue[];
 
     await turso.execute({
       sql: `UPDATE proposals SET ${setClauses} WHERE id = ?`,

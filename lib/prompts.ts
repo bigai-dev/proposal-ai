@@ -184,7 +184,12 @@ Phone: +60 3-2148 9500
 Address: Level 15, Menara UOA Bangsar, Kuala Lumpur`;
 
 export function buildUserPrompt(data: InquiryFormData): string {
-  return `New client inquiry received:
+  const today = new Date().toLocaleDateString("en-MY", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  return `New client inquiry received on ${today} (use this as today's date in the proposal):
 
 Client Name: ${data.fullName}
 Email: ${data.email}

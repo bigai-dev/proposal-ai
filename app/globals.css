@@ -12,6 +12,36 @@
   animation: blink 1s step-end infinite;
 }
 
+/* Homepage hero: proposal document writing itself */
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0) rotate(1deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+.hero-doc {
+  transform: rotate(1deg);
+  animation: heroFloat 7s ease-in-out infinite;
+}
+
+@keyframes typingGrow {
+  0% { width: 0; opacity: 1; }
+  70% { width: 50%; opacity: 1; }
+  85% { width: 50%; opacity: 0.4; }
+  100% { width: 50%; opacity: 1; }
+}
+
+.typing-line {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  animation: typingGrow 3.5s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-doc,
+  .typing-line {
+    animation: none;
+  }
+}
+
 /* Proposal prose styling - ensures markdown renders with proper visual hierarchy */
 .proposal-prose h1 {
   font-size: 1.75rem;

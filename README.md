@@ -21,7 +21,7 @@ Built for a fictional software agency ("CodeForge Solutions Sdn Bhd"), this app 
 - **UI:** React 19
 - **Styling:** Tailwind CSS v4 (PostCSS)
 - **Database:** Turso / libSQL (`@libsql/client`)
-- **AI provider:** BytePlus Ark, called through the OpenAI-compatible `openai` SDK
+- **AI provider:** DeepSeek, called through the OpenAI-compatible `openai` SDK
 - **Markdown rendering:** react-markdown + remark-gfm
 
 ## Getting Started
@@ -30,7 +30,7 @@ Built for a fictional software agency ("CodeForge Solutions Sdn Bhd"), this app 
 
 - Node.js 20+ and npm
 - A Turso (libSQL) database — free tier is fine
-- A BytePlus Ark API key (or any OpenAI-compatible provider)
+- A DeepSeek API key (or any OpenAI-compatible provider)
 
 ### Installation
 
@@ -67,7 +67,7 @@ Copy `.env.example` to `.env.local` and fill in:
 |----------|-------------|
 | `TURSO_DATABASE_URL` | Connection URL for your Turso / libSQL database |
 | `TURSO_AUTH_TOKEN` | Auth token for the Turso database |
-| `ARK_API_KEY` | API key for the BytePlus Ark LLM (OpenAI-compatible) |
+| `DEEPSEEK_API_KEY` | API key for the DeepSeek LLM (OpenAI-compatible) |
 
 `.env.local` is gitignored, so your keys stay on your machine.
 

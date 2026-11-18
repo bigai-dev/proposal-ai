@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import ThemeToggle from "@/components/ThemeToggle";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import InquiryForm from "@/components/InquiryForm";
 import { InquiryFormData } from "@/lib/constants";
@@ -32,19 +31,7 @@ export default function ApplyPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-      <header className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/apply" className="flex items-center gap-1">
-            <span className="text-xl font-bold text-blue-600 dark:text-blue-500">
-              CodeForge
-            </span>
-            <span className="text-xl text-slate-600 dark:text-slate-400">
-              Solutions
-            </span>
-          </Link>
-          <ThemeToggle />
-        </div>
-      </header>
+      <Header />
       <main className="flex-1 px-4 py-8 md:py-12">
         {submitted ? (
           <div className="max-w-xl mx-auto text-center py-16">
